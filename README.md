@@ -33,8 +33,7 @@
     *   `json` (用于 AJAX 响应)
     *   `mbstring` (处理中文等多字节字符，可选但推荐)
 *   **Java Runtime Environment (JRE)**: 版本 >= 8，用于执行签名工具。
-*   **Android SDK Tools**: 需要 `apksigner.jar` 和 `zipalign` 工具。
-*   ** (官方下载: https://developer.android.google.cn ""Linux版本的命令行工具,文件名通常为commandlinetools-linux-********_latest.zip)
+*   **Android SDK Tools**: 需要 `apksigner.jar` 和 `zipalign` 工具。[点此访问Android 官网](https://developer.android.google.cn)  请下载部署Linux版本的命令行工具,文件名通常为commandlinetools-linux-********_latest.zip)
 *   **Android Asset Packaging Tool (AAPT)**: (可选) 用于精确提取 APK 包名，通常包含在 Android SDK Build-tools 或 AOSP 中。
 *   **JAR Signer**: 通常随 JDK/JRE 一起提供。
 
@@ -109,4 +108,4 @@
 *   **资源限制**: 检查 PHP 的 `upload_max_filesize`, `post_max_size`, `max_execution_time` 等配置，确保它们适合您的文件大小和处理时间需求。
 
 ---
-Copyright &copy; 2026 梦工厂. All Rights Reserved.
+Copyright &copy; 2026 [梦工厂](https://www.heavenke.cn). All Rights Reserved.
