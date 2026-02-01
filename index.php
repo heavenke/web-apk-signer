@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APK/JAR 签名平台</title>
+    <title>APK/JAR 签名平台 - 梦工厂</title>
     <style>
         /* ===== 通用重置 ===== */
         * {
@@ -172,9 +172,18 @@
             margin-top: 4px;
         }
 
-        /* ===== 消息提示框 —— 不变，保持原样 ===== */
-        .message {
+        /* ===== 消息提示框容器 ===== */
+        #messageContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin-top: 24px;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        /* ===== 消息提示框 ===== */
+        .message {
             padding: 16px;
             border-radius: 10px;
             font-size: 16px;
@@ -187,6 +196,7 @@
             box-sizing: border-box;
             position: relative;
             z-index: 10;
+            margin-top: 0;
         }
 
         .message.success {
@@ -211,7 +221,7 @@
             border: 1px solid #c3e6cb;
             width: 100%;
             max-width: 520px;
-            margin: 24px auto 0;
+            margin: 0;
             word-wrap: break-word;
         }
 
@@ -326,9 +336,9 @@
         <a target="_blank" title="51la网站统计" href="https://v6.51.la/land/L2axk8pGwfSyalvw">
             <img src="https://sdk.51.la/icon/1-2.png" alt="51La统计" style="vertical-align: middle; margin-right: 4px;">
         </a><br>
-        Copyright &copy; 2026 <a href="https://www.heavenke.cn" target="_self" style="color: #3498db; text-decoration: none;">梦工厂</a> All Rights Reserved.<br>
-        <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">粤ICP备2021097857号-1</a><br>
-        本站由<a href="https://www.aliyun.com" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">阿里云计算</a>提供CDN加速服务
+        <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer" style="color: #333333; text-decoration: none;">粤ICP备2021097857号-1</a><br><span style="display: inline-block; vertical-align: middle; margin-top: 1px;"><img src="images/mps.png" class="w-full" style="width: 16px"></span> <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44142602000142" style="color: #333333; text-decoration: none;" rel="noreferrer" target="_blank">粤公网安备44142602000142号</a><br>
+        本站由<a href="https://www.aliyun.com" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">阿里云计算</a>提供CDN加速服务<br>
+		Copyright &copy; 2026 <a href="https://www.heavenke.cn" target="_self" style="color: #3498db; text-decoration: none;">梦工厂</a> All Rights Reserved.
     </div>
 </div>
 
@@ -430,7 +440,7 @@
             if (options.v3) formData.append('v3', '1');
 
             const xhr = new XMLHttpRequest();
-            // --- 🔒 修改：指向新的处理文件 ---
+            // --- 指向新的处理文件 ---
             xhr.open('POST', 'upload_handler.php?action=chunk_upload', true);
 
             xhr.onload = function() {
@@ -488,7 +498,7 @@
         if (v3) formData.append('v3', '1');
 
         const xhr = new XMLHttpRequest();
-        // --- 🔒 修改：指向新的处理文件 ---
+        // --- 指向新的处理文件 ---
         xhr.open('POST', 'upload_handler.php', true);
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
@@ -594,7 +604,7 @@
                 const formData = new FormData();
                 formData.append('file', file, file.name); // Explicitly set filename
 
-                // --- 🔒 修复：手动添加 V1/V2/V3 复选框的状态 ---
+                // --- 手动添加 V1/V2/V3 复选框的状态 ---
                 const isApk = file.name.toLowerCase().endsWith('.apk');
                 if (isApk) {
                     const v1Checkbox = document.querySelector('input[name="v1"]');
@@ -607,7 +617,7 @@
                 }
                 // --- END OF FIX ---
 
-                // --- 🔒 修改：指向新的处理文件 ---
+                // --- 指向新的处理文件 ---
                 xhr.open('POST', 'upload_handler.php', true);
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 xhr.send(formData);
