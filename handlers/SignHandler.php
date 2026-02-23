@@ -122,6 +122,22 @@ class SignHandler {
                 if (!$v1 && !$v2 && !$v3) {
                     $result['message'] = "请至少选择一种签名方案（V1/V2/V3）";
                 } else {
+                    // --- 新增: 先进行 Zipalign ---
+                    $cmdAlign = sprintf(
+                        'HOME=/tmp %s -f -v 4 %s %s 2>&1',
+                        escapeshellarg($this->config['zipalign_path']),
+                        escapeshellarg($inputFile), // 对原始输入文件进行对齐
+                        escapeshellarg($alignedApk)  // 输出到最终的目标文件名
+                    );
+                    exec($cmdAlign, $alignOutput, $alignResultCode);
+
+                    if ($alignResultCode !== 0 || !file_exists($alignedApk)) {
+                        $result['message'] = "Zipalign 失败:\n" . redact_paths(implode("\n", $alignOutput));
+                        return $result; // 提前返回，不再继续签名
+                    }
+                    // --- Zipalign 完成 ---
+
+                    // --- 修改: 签名操作直接作用于已对齐的 $alignedApk ---
                     $apksignerArgs = ['sign'];
                     if ($v1) {
                         $apksignerArgs[] = '--v1-signing-enabled';
@@ -140,8 +156,8 @@ class SignHandler {
                         '--ks-key-alias', $this->config['key_alias'],
                         '--ks-pass', 'pass:' . $this->config['keystore_password'],
                         '--key-pass', 'pass:' . $this->config['key_password'],
-                        '--out', $outputFile,
-                        $inputFile
+                        '--out', $alignedApk, // 直接覆盖已对齐的文件
+                        $alignedApk          // 输入也是已对齐的文件
                     ]);
                     $escapedArgs = array_map('escapeshellarg', $apksignerArgs);
                     $apksignerCmd = escapeshellarg($this->config['java_path']) . ' -jar ' . escapeshellarg($this->config['apksigner_jar']) . ' ' . implode(' ', $escapedArgs);
@@ -151,36 +167,24 @@ class SignHandler {
                     if ($result_code !== 0) {
                         $result['message'] = "APK 签名失败:\n" . redact_paths(implode("\n", $output));
                     } else {
-                        // 4. Zipalign
-                        $cmdAlign = sprintf(
-                            'HOME=/tmp %s -f -v 4 %s %s 2>&1',
-                            escapeshellarg($this->config['zipalign_path']),
-                            escapeshellarg($outputFile),
-                            escapeshellarg($alignedApk)
-                        );
-                        exec($cmdAlign, $alignOutput, $alignResultCode);
-
-                        if ($alignResultCode === 0 && file_exists($alignedApk)) {
-                            $outputFileName = $this->getSafeOutputFilename($fileInfo['name'], FILE_TYPE_APK);
-                            $dlPath = $this->downloadDir . '/' . $outputFileName;
-                            if (file_exists($dlPath)) {
-                                unlink($dlPath); // 删除旧文件
-                            }
-                            if (copy($alignedApk, $dlPath)) {
-                                chmod($dlPath, 0644);
-                                $dlUrl = './dl/' . urlencode($outputFileName);
-                                $result['success'] = true;
-                                $result['message'] = '<div class="success-message">
+                        // 4. 此时 $alignedApk 已经是签名并对齐的最终文件
+                        $outputFileName = $this->getSafeOutputFilename($fileInfo['name'], FILE_TYPE_APK);
+                        $dlPath = $this->downloadDir . '/' . $outputFileName;
+                        if (file_exists($dlPath)) {
+                            unlink($dlPath); // 删除旧文件
+                        }
+                        if (copy($alignedApk, $dlPath)) {
+                            chmod($dlPath, 0644);
+                            $dlUrl = './dl/' . urlencode($outputFileName);
+                            $result['success'] = true;
+                            $result['message'] = '<div class="success-message">
                                                          <p class="success-title">APK 签名成功！</p>
                                                          <a href="' . htmlspecialchars($dlUrl) . '" class="btn-download">点击下载</a>
                                                          <div class="file-name">' . htmlspecialchars($outputFileName) . '</div>
                                                          <p class="download-tip">提示: 下载链接有效期为1小时，请尽快下载。</p>
                                                      </div>';
-                            } else {
-                                $result['message'] = '无法生成下载文件。';
-                            }
                         } else {
-                            $result['message'] = "Zipalign 失败:\n" . redact_paths(implode("\n", $alignOutput));
+                            $result['message'] = '无法生成下载文件。';
                         }
                     }
                 }
@@ -190,7 +194,7 @@ class SignHandler {
         } finally {
             // 5. 清理临时文件
             foreach ([$inputFile, $outputFile, $alignedApk] as $tempFile) {
-                if (file_exists($tempFile)) {
+                if (file_exists($tempFile) && $tempFile !== $dlPath) { // 确保不删除刚创建的下载文件
                     unlink($tempFile);
                 }
             }
